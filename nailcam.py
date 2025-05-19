@@ -4,9 +4,14 @@ import os
 import math
 import time
 
+from Foundation import NSObject, NSUserNotification, NSUserNotificationCenter
+
 def notify_mac(title, message):
-    os.system(f'''osascript -e 'display notification "{message}" with title "{title}"' ''')
-    os.system("afplay /System/Library/Sounds/Ping.aiff")
+    notification = NSUserNotification.alloc().init()
+    notification.setTitle_(title)
+    notification.setInformativeText_(message)
+    notification.setSoundName_("NSUserNotificationDefaultSoundName")
+    NSUserNotificationCenter.defaultUserNotificationCenter().deliverNotification_(notification)
 
 mp_hands = mp.solutions.hands
 mp_face_mesh = mp.solutions.face_mesh
