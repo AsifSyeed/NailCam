@@ -1,10 +1,9 @@
 import cv2
 import mediapipe as mp
-import os
-import math
 import time
 
 from app.notifier import notify
+from app.tracker import BiteTracker
 
 mp_hands = mp.solutions.hands
 mp_face_mesh = mp.solutions.face_mesh
@@ -12,12 +11,7 @@ hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5
 face_mesh = mp_face_mesh.FaceMesh()
 
 cap = cv2.VideoCapture(0)
-
-def euclidean_distance(p1, p2):
-    return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
-
-last_alert_time = 0
-cooldown_seconds = 10
+tracker = BiteTracker()
 
 while cap.isOpened():
     success, frame = cap.read()
@@ -30,20 +24,11 @@ while cap.isOpened():
     hand_results = hands.process(rgb_frame)
     face_results = face_mesh.process(rgb_frame)
 
-    if hand_results.multi_hand_landmarks and face_results.multi_face_landmarks:
-        for face_landmarks in face_results.multi_face_landmarks:
-            upper_lip = face_landmarks.landmark[13]
-            for hand_landmarks in hand_results.multi_hand_landmarks:
-                for tip_index in [4, 8, 12, 16, 20]:
-                    fingertip = hand_landmarks.landmark[tip_index]
-                    distance = euclidean_distance(fingertip, upper_lip)
+    hand_landmarks = hand_results.multi_hand_landmarks or []
+    face_landmarks = face_results.multi_face_landmarks or []
 
-                    if distance < 0.07:
-                        current_time = time.time()
-                        if current_time - last_alert_time > cooldown_seconds:
-                            notify("Stop Biting!", "Hands off your face 🚫")
-                            last_alert_time = current_time
-                        break
+    if tracker.check_for_bite(face_landmarks, hand_landmarks, time.time()):
+        notify("Stop Biting!", "Hands off your face 🚫")
 
     cv2.imshow('NailCam Watcher - Press Q to Quit', frame)
     if cv2.waitKey(5) & 0xFF == ord('q'):
