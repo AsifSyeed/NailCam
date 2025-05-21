@@ -2,13 +2,16 @@ from setuptools import setup
 
 APP = ['nailcam.py']
 OPTIONS = {
-    'argv_emulation': True,
+    # DO NOT use 'argv_emulation'
     'iconfile': 'icon.icns',
     'packages': ['cv2', 'mediapipe'],
+    'includes': ['Foundation', 'AppKit'],
     'plist': {
-        'NSCameraUsageDescription': 'NailCam needs access to your camera to detect nail-biting gestures.',
+        'CFBundleName': 'NailCam',
+        'CFBundleDisplayName': 'NailCam',
+        'CFBundleIdentifier': 'com.asifreddot.nailcam',
         'CFBundleIconFile': 'icon',
-        'CFBundleIdentifier': 'com.asifreddot.nailcam'
+        'NSCameraUsageDescription': 'NailCam needs access to your camera to detect nail-biting gestures.',
     }
 }
 

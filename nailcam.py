@@ -4,14 +4,7 @@ import os
 import math
 import time
 
-from Foundation import NSObject, NSUserNotification, NSUserNotificationCenter
-
-def notify_mac(title, message):
-    notification = NSUserNotification.alloc().init()
-    notification.setTitle_(title)
-    notification.setInformativeText_(message)
-    notification.setSoundName_("NSUserNotificationDefaultSoundName")
-    NSUserNotificationCenter.defaultUserNotificationCenter().deliverNotification_(notification)
+from app.notifier import notify
 
 mp_hands = mp.solutions.hands
 mp_face_mesh = mp.solutions.face_mesh
@@ -48,7 +41,7 @@ while cap.isOpened():
                     if distance < 0.07:
                         current_time = time.time()
                         if current_time - last_alert_time > cooldown_seconds:
-                            notify_mac("Stop Biting!", "Hands off your face 🚫")
+                            notify("Stop Biting!", "Hands off your face 🚫")
                             last_alert_time = current_time
                         break
 
